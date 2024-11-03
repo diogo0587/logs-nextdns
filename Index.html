@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NextDNS Logs</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>NextDNS Logs</h1>
+  <canvas id="myChart" width="400" height="200"></canvas>
+  <script>
+    const apiUrl = 'https://api.nextdns.io/profiles/85d564/logs';
+    const apiKey = 'f31f2871d328a52a45fefadc09a1c67d0dd5d53d';
+
+    async function fetchData() {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'X-Api-Key': apiKey
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        renderChart(data);
+      } else {
+        console.error('Failed to fetch data');
+      }
+    }
+
+    function renderChart(data) {
+      const ctx = document.getElementById('myChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(item => new Date(item.timestamp).toLocaleDateString()),
+          datasets: [{
+            label: 'Analytics Data',
+            data: data.map(item => item.value),
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>
