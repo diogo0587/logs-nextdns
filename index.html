@@ -21,9 +21,10 @@
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Dados recebidos:', data);  // Linha de depuração
         renderChart(data);
       } else {
-        console.error('Failed to fetch data');
+        console.error('Falha ao buscar dados');
       }
     }
 
