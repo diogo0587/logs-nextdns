@@ -14,6 +14,12 @@
       padding: 10px;
       text-align: left;
     }
+    .pagination {
+      margin-top: 10px;
+    }
+    .pagination button {
+      padding: 5px 10px;
+    }
   </style>
 </head>
 <body>
@@ -22,49 +28,79 @@
     <thead>
       <tr>
         <th>Timestamp</th>
-        <th>Value</th>
+        <th>Query</th>
+        <th>Response</th>
+        <th>Client</th>
+        <th>Type</th>
       </tr>
     </thead>
     <tbody>
       <!-- Dados serão inseridos aqui -->
     </tbody>
   </table>
+  <div class="pagination">
+    <button onclick="prevPage()">Anterior</button>
+    <button onclick="nextPage()">Próximo</button>
+  </div>
   <script>
-    const apiUrl = 'https://api.nextdns.io/profiles/85d564/logs';
-    const apiKey = 'f31f2871d328a52a45fefadc09a1c67d0dd5d53d';
+    const apiUrl = 'https://diogos0587.pythonanywhere.com/logs';  // Use o seu domínio PythonAnywhere
+    let data = [];
+    let currentPage = 1;
+    const logsPerPage = 10;
 
     async function fetchData() {
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'X-Api-Key': apiKey
-        }
-      });
+      const response = await fetch(apiUrl);
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('Dados recebidos:', data);  // Linha de depuração
-        renderTable(data);
+        data = await response.json();
+        renderTable();
       } else {
         console.error('Falha ao buscar dados');
       }
     }
 
-    function renderTable(data) {
+    function renderTable() {
       const tbody = document.getElementById('logsTable').getElementsByTagName('tbody')[0];
-     // tbody.innerHTML = '';  // Limpa a tabela antes de inserir novos dados
-      data.forEach(item => {
+      tbody.innerHTML = '';  // Limpa a tabela antes de inserir novos dados
+      const start = (currentPage - 1) * logsPerPage;
+      const end = start + logsPerPage;
+      const pageData = data.slice(start, end);
+
+      pageData.forEach(item => {
         const row = document.createElement('tr');
         const timestampCell = document.createElement('td');
-        const valueCell = document.createElement('td');
+        const queryCell = document.createElement('td');
+        const responseCell = document.createElement('td');
+        const clientCell = document.createElement('td');
+        const typeCell = document.createElement('td');
         
-        timestampCell.textContent = new Date(item.timestamp).toLocaleString();
-        valueCell.textContent = item.value;
+        timestampCell.textContent = new Date(item.datetime).toLocaleString();
+        queryCell.textContent = item.query;
+        responseCell.textContent = item.response;
+        clientCell.textContent = item.client;
+        typeCell.textContent = item.type;
         
         row.appendChild(timestampCell);
-        row.appendChild(valueCell);
+        row.appendChild(queryCell);
+        row.appendChild(responseCell);
+        row.appendChild(clientCell);
+        row.appendChild(typeCell);
         tbody.appendChild(row);
       });
+    }
+
+    function nextPage() {
+      if (currentPage * logsPerPage < data.length) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
     }
 
     fetchData();
